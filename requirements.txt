@@ -1,0 +1,27 @@
+# basics
+numpy
+pandas
+pathlib
+ipdb
+jupyterlab
+
+# API
+fastapi         # API framework
+pytz            # time zone management
+uvicorn         # web server
+
+# model training
+scikit-learn
+tensorflow
+keras
+google-cloud-storage
+
+# viz
+matplotlib
+seaborn
+plotly
+colorama
+
+# tests
+pytest
+pylint
