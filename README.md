@@ -9,7 +9,7 @@ We are currently in the early stages of setting up the ImmunoReady tool. This RE
 Initial Setup
 To get started, clone or download this GitHub repository to your local machine:
 
-<pre><code>bash # Clone the repository git clone https://github.com/your-username/immunoready.git
+git clone https://github.com/your-username/immunoready.git
 
 ## Git commits labels
 feat:	New feature
