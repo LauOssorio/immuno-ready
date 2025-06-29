@@ -3,9 +3,16 @@ import pandas as pd
 from src.config import RAW_DATA_PATH
 
 
-def load_hla_ligand_atlas(normal_file_name = "raw_negatives_hla_ligand_atlas.tsv"):
+def load_hla_ligand_atlas(normal_file_name = "hla_2020.12_HLA_aggregated.tsv",
+                          metadata_file = "hla_2020.12_HLA_sample_hits.tsv"):
     hla_ligand_atlas_df = pd.read_csv(RAW_DATA_PATH + normal_file_name, sep='\t')
-    return hla_ligand_atlas_df
+    hla_ligand_atlas_metadata = pd.read_csv(RAW_DATA_PATH + normal_file_name, sep='\t')
+    return hla_ligand_atlas_df, hla_ligand_atlas_metadata
+
+def n_indv_per_peptide():
+    #TODO: calculate number of donnors in which the peptide was found.
+    # #Call the column 'Assay - Number of Subjects Tested'
+    pass
 
 
 def add_relevant_columns(hla_ligand_atlas_df):
@@ -44,7 +51,6 @@ def add_relevant_columns(hla_ligand_atlas_df):
     new_data_frame['Assay - Method'] = 'None'
     new_data_frame['Assay - Response measured'] = 'None'
     new_data_frame['Assay - Qualitative Measure'] = 'Negative'
-    new_data_frame['Assay - Number of Subjects Tested'] = np.nan
     new_data_frame['Assay - Response Frequency (%)'] = np.nan
 
     #Rename values in the hla_class column
@@ -57,6 +63,7 @@ def add_relevant_columns(hla_ligand_atlas_df):
     new_data_frame['MHC Restriction - Class'] = hla_ligand_atlas_df['hla_class'].map(MHC_restriction_map)
 
     new_data_frame = new_data_frame[(new_data_frame['MHC Restriction - Class'] == "I")|(new_data_frame['MHC Restriction - Class'] == "II")]
+
 
     return new_data_frame
 
