@@ -1,13 +1,7 @@
 import numpy as np
 import pandas as pd
-from src.config import RAW_DATA_PATH
+from src.data_processing.data_loader import load_hla_ligand_atlas
 
-
-def load_hla_ligand_atlas(normal_file_name = "hla_2020.12_HLA_aggregated.tsv",
-                          metadata_file = "hla_2020.12_HLA_sample_hits.tsv"):
-    hla_ligand_atlas_df = pd.read_csv(RAW_DATA_PATH + normal_file_name, sep='\t')
-    hla_ligand_atlas_metadata = pd.read_csv(RAW_DATA_PATH + metadata_file, sep='\t')
-    return hla_ligand_atlas_df, hla_ligand_atlas_metadata
 
 def n_indv_per_peptide():
     peptides_df, metadata_df = load_hla_ligand_atlas()
@@ -70,3 +64,7 @@ def load_clean_normal():
 
 
     return new_data_frame
+
+
+if __name__ == "__main__":
+    load_clean_normal()

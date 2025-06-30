@@ -12,12 +12,28 @@ To get started, clone or download this GitHub repository to your local machine:
 git clone https://github.com/LauOssorio/immuno-ready.git
 
 ## Git commits labels
-feat:	New feature
-fix:	Bug fix
-docs:	Documentation only	docs
-refactor:	Code changes that don’t change behavior	refactor
-test:	Adding or updating tests	test
+- feat:	New feature
+- fix:	Bug fix
+- docs:	Documentation only	docs
+- refactor:	Code changes that don’t change behavior	refactor
+- test:	Adding or updating tests	test
+
+# Training raw data specifications:
+
+## Peptides from HLA ligand atlas
+This data base will be use to construct the category of peptides  would not trigger an immune response as their presence in normal tissues would indicate immunity tolerance.
+
+The list of peptides (MHC Class I and II) was dowloaded the 29th of June 2025 from: https://hla-ligand-atlas.org/data
+
+## Peptides from IEDB
+
+TO DO: include image of the filters for the search
+The API request is WIP, still not fucntional at the moment.
+
+# Feature engineering
+- MHC I and II shared epitope: sequence of the MHC class I epitope contained in MHC class II presented epitope.
 
 
+https://github.com/IEDB/IQ-API-use-cases
 ## Acnowledgement of published work on the matter:
 TO DO
