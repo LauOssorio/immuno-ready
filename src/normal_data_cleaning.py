@@ -6,16 +6,23 @@ from src.config import RAW_DATA_PATH
 def load_hla_ligand_atlas(normal_file_name = "hla_2020.12_HLA_aggregated.tsv",
                           metadata_file = "hla_2020.12_HLA_sample_hits.tsv"):
     hla_ligand_atlas_df = pd.read_csv(RAW_DATA_PATH + normal_file_name, sep='\t')
-    hla_ligand_atlas_metadata = pd.read_csv(RAW_DATA_PATH + normal_file_name, sep='\t')
+    hla_ligand_atlas_metadata = pd.read_csv(RAW_DATA_PATH + metadata_file, sep='\t')
     return hla_ligand_atlas_df, hla_ligand_atlas_metadata
 
 def n_indv_per_peptide():
-    #TODO: calculate number of donnors in which the peptide was found.
-    # #Call the column 'Assay - Number of Subjects Tested'
-    pass
+    peptides_df, metadata_df = load_hla_ligand_atlas()
+
+    full_df = pd.merge(peptides_df, metadata_df,
+                       on= ["peptide_sequence_id", "hla_class"])[["peptide_sequence", "donor", "hla_class"]].drop_duplicates()
+    full_df["Assay - Number of Subjects Tested"] = full_df.groupby("peptide_sequence")["donor"].transform("nunique")
+
+    full_df = full_df.drop(columns="donor").drop_duplicates()
+    return  full_df
 
 
-def add_relevant_columns(hla_ligand_atlas_df):
+
+
+def load_clean_normal():
     """
     Standardizes the HLA Ligand Atlas dataset to match the format of the cleaned IEDB positive dataset.
 
@@ -25,17 +32,13 @@ def add_relevant_columns(hla_ligand_atlas_df):
     - Maps and filters the MHC restriction class to include only MHC class I and II
     - Returns a cleaned DataFrame ready to be merged with the positive dataset
 
-    Parameters:
-    -----------
-    hla_ligand_atlas_df : pd.DataFrame
-        The raw HLA Ligand Atlas DataFrame, expected to have at least
-        'peptide_sequence' and 'hla_class' columns.
-
     Returns:
     --------
     pd.DataFrame
         A new DataFrame with standardized columns and filtered for MHC class I and II only.
     """
+    hla_ligand_atlas_df = n_indv_per_peptide()
+
     new_data_frame = pd.DataFrame()
 
     #Rename columns (peptide-name and MHC restriction class)
@@ -43,6 +46,7 @@ def add_relevant_columns(hla_ligand_atlas_df):
 
     #Create healthy/control columns
     new_data_frame['Epitope - Name'] = hla_ligand_atlas_df['peptide_sequence']
+    new_data_frame['Assay - Number of Subjects Tested'] =hla_ligand_atlas_df['Assay - Number of Subjects Tested']
     new_data_frame['Epitope - Source Organism'] = 'Homo sapiens'
     new_data_frame['Epitope - Species'] = 'Homo sapiens'
     new_data_frame['1st in vivo Process - Process Type'] = 'None'
@@ -66,9 +70,3 @@ def add_relevant_columns(hla_ligand_atlas_df):
 
 
     return new_data_frame
-
-
-def load_clean_normal():
-    df = load_hla_ligand_atlas()
-    df = add_relevant_columns(df)
-    return df
