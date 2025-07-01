@@ -1,68 +1,62 @@
-import pandas as pd
 import requests
+import json
 import pandas as pd
+import time
+from io import StringIO
+from datetime import datetime
+from src.config import *
 
-def fetch_epitopes_api(filters=None, select=None, order=None, batch_size=10000, table_name='tcell_search'):
+base_uri= IEDB_API_BASE_URL
+
+
+def print_curl_cmd(req):
     """
-    Fetches all epitope records from the IEDB IQ API using POST requests with pagination.
-
-    Args:
-        filters (dict): Dictionary of filters for the query (e.g., {"hla_class": {"EQ": "HLA-I"}}).
-        select (list): List of fields to select.
-        order (list): List of fields to order by (required for pagination).
-        batch_size (int): Number of records to fetch per request (max 10000).
-
-    Returns:
-        pd.DataFrame: DataFrame containing all retrieved records.
+    Print a cURL command equivalent to the given request for debugging.
     """
-    base_url = "https://query-api.iedb.org"
-    table_name='epitope_search'
-    url=base_url + '/' + table_name
-    all_data = []
-    offset = 0
+    url = req.url
+    print("curl -X 'GET' '" + url + "'")
 
-    if filters is None:
-        filters = {}
-    if select is None:
-        select = []
-    if order is None:
-        raise ValueError("You must specify an 'order' field for pagination.")
+def retrieve_IEDB_api_data():
+    """
+    Retrieve data from the IEDB API using pagination for requests larger than 10000
+    observations and return it as a DataFrame.
+    """
 
-    while True:
-        payload = {
-            "filters": filters,
-            "select": select,
-            "order": order,
-            "limit": batch_size,
-            "offset": offset
-        }
+    search_params={'host_organism_iri_search': 'cs.{"NCBITaxon:9606"}',
+                    'order': 'structure_id', 'offset':0,
+                    'qualitative_measure': 'not.eq.Negative'
+                    }
 
-        response = requests.post(url, json=payload)
-        response.raise_for_status()
+    table_name='tcell_search'
 
-        batch_data = response.json()
+    full_url=base_uri + '/' + table_name
 
-        if not batch_data:
-            break  # No more data to fetch
+    result = requests.get(full_url, params=search_params)
 
-        all_data.extend(batch_data)
+    print_curl_cmd(result)
 
-        if len(batch_data) < batch_size:
-            break  # Last batch received
+    df = pd.json_normalize(result.json())
 
-        offset += batch_size
+    while len(result.json()) > 0:
+        time.sleep(2)
+        search_params['offset'] += 10000
+        print('offset: ' + str(search_params['offset']))
+        result = requests.get(full_url, params=search_params)
+        df = pd.concat([df, pd.json_normalize(result.json())], ignore_index=True)
 
-    return pd.DataFrame(all_data)
+    print('Done!')
 
-# Example usage:
+    return df
+
+
+def api_request_to_csv(filename_prefix = "IEDB_positive_peptides"):
+    """
+    Save retrieved IEDB data to a CSV file in the raw data folder.
+    """
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{filename_prefix}_{timestamp}.csv"
+    retrieve_IEDB_api_data().to_csv(RAW_DATA_PATH + filename, index=False)
+
+
 if __name__ == "__main__":
-    filters = {
-        "hla_class": {"EQ": "HLA-I"}  # Example filter
-    }
-    select = ["structure_id", "linear_sequence", "hla_class"]
-    order = ["structure_id"]
-
-    df = fetch_epitopes_api(filters=filters, select=select, order=order)
-    print(f"Retrieved {len(df)} records")
-    # You can save it if you want:
-    df.to_csv("data/raw/iedb_epitopes.csv", index=False)
+    api_request_to_csv()
