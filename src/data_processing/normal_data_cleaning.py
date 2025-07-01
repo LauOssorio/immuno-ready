@@ -8,7 +8,7 @@ def n_indv_per_peptide():
 
     full_df = pd.merge(peptides_df, metadata_df,
                        on= ["peptide_sequence_id", "hla_class"])[["peptide_sequence", "donor", "hla_class"]].drop_duplicates()
-    full_df["Assay - Number of Subjects Tested"] = full_df.groupby("peptide_sequence")["donor"].transform("nunique")
+    full_df["averaged_number_of_subjects"] = full_df.groupby("peptide_sequence")["donor"].transform("nunique")
 
     full_df = full_df.drop(columns="donor").drop_duplicates()
     return  full_df
@@ -40,7 +40,7 @@ def load_clean_normal():
 
     #Create healthy/control columns
     new_data_frame['Epitope - Name'] = hla_ligand_atlas_df['peptide_sequence']
-    new_data_frame['Assay - Number of Subjects Tested'] =hla_ligand_atlas_df['Assay - Number of Subjects Tested']
+    new_data_frame['averaged_number_of_subjects'] =hla_ligand_atlas_df['averaged_number_of_subjects']
     new_data_frame['Epitope - Source Organism'] = 'Homo sapiens'
     new_data_frame['Epitope - Species'] = 'Homo sapiens'
     new_data_frame['1st in vivo Process - Process Type'] = 'None'

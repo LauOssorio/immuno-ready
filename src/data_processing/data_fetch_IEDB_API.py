@@ -49,12 +49,11 @@ def retrieve_IEDB_api_data():
     return df
 
 
-def api_request_to_csv(filename_prefix = "IEDB_positive_peptides"):
+def api_request_to_csv(filename = "IEDB_positive_peptides.csv"):
     """
     Save retrieved IEDB data to a CSV file in the raw data folder.
     """
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{filename_prefix}_{timestamp}.csv"
+
     retrieve_IEDB_api_data().to_csv(RAW_DATA_PATH + filename, index=False)
 
 
