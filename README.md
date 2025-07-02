@@ -1,5 +1,5 @@
 # Disclaimer ⚠️
-This tool is being developed primarily for educational purposes—to explore how to build tools like this and to create a pharma-oriented coding portfolio. While we strive for scientific accuracy, any conclusions drawn from its results should not be considered definitive or used as the sole basis for decision-making.
+This tool is being developed primarily for educational purposes—to explore how to build tools like this and to create a pharma-oriented coding portfolio. It stands on the project developed at Le Wagon Data Science bootcamp by Alice Lemery, Jean-Baptiste Fallacher, Benjamin Galet and Laura Ossorio Carballo. While we strive for scientific accuracy, any conclusions drawn from its results should not be considered definitive or used as the sole basis for decision-making.
 
 That said, if you run or collaborate with a wet lab specializing in immuno-oncology and are interested in validating this tool through experiments, we’d love to hear from you! Feel free to reach out—we're always open to meaningful collaborations.
 

@@ -64,9 +64,6 @@ def fix_weird_peptides (data_frame):
 
     return data_frame
 
-# TODO: the response frequency is not consisted with the sequences becasue the same sequence
-# was tested in different assays - do something with this so one peptide will have one
-# frequency value. Relate to the averaged number of subjects.
 
 
 def peptide_length(peptide):
@@ -76,7 +73,6 @@ def peptide_length(peptide):
 
 def drop_large_and_short_sequences (data_frame , min_length, max_length):
 # Function that drops all peptides with sequence length > 25 (or any chosen max_length) AA
-# FYI: choosing 25 removes c.7k rows (after removal of weird values)
 
     # Add peptide length column temporarily
     data_frame.loc[:,'peptide length'] = data_frame['Epitope - Name'].apply(peptide_length)
@@ -94,16 +90,24 @@ def drop_large_and_short_sequences (data_frame , min_length, max_length):
 
 def average_number_of_individuals(data_frame):
 # Function to calculate the average number of individuals tested per peptide
-    data_frame["averaged_number_subjects_tested"] = (
+# correcting the number of individuals by the % of response frequency.
+    data_frame["positive_subjects_tested"] = data_frame["Assay - Response Frequency (%)"].fillna(100) * 0.01 * data_frame["Assay - Number of Subjects Tested"]
+
+    data_frame["averaged_number_positive_subjects_tested"] = (
+        data_frame.groupby("Epitope - Name")["positive_subjects_tested"]
+        .transform(lambda x: x.sum(min_count=1)))
+
+    data_frame["TEST_averaged_number_subjects_tested"] = (
         data_frame.groupby("Epitope - Name")["Assay - Number of Subjects Tested"]
         .transform(lambda x: x.sum(min_count=1)))
 
-    data_frame.drop(columns=["Assay - Number of Subjects Tested"], inplace=True)
+    #data_frame.drop(columns=["Assay - Number of Subjects Tested"], inplace=True)
 
-    # drop duplicateed lines
+    # drop duplicated lines
     data_frame = data_frame.drop_duplicates()
 
     return data_frame
+
 
 
 def load_clean_iedb (min_length =8, max_length = 25):
@@ -116,9 +120,6 @@ def load_clean_iedb (min_length =8, max_length = 25):
 
     # Remove / fix weird peptides
     data_frame = fix_weird_peptides (data_frame)
-
-    # Remove overlap between neg and pos (only negatives are deleted)
-    data_frame = remove_overlap (data_frame)
 
     # Remove unusually long sequences (default is >25 but any max_length will work)
     data_frame = drop_large_and_short_sequences (data_frame , min_length, max_length)
