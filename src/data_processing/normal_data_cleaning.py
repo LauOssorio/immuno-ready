@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
-from src.data_processing.data_loader import load_hla_ligand_atlas
+from src.data_processing.data_loader import load_raw_hla_ligand_atlas
+from src.config import RAW_DATA_PATH
+
 
 
 def n_indv_per_peptide():
-    peptides_df, metadata_df = load_hla_ligand_atlas()
+    peptides_df, metadata_df = load_raw_hla_ligand_atlas()
 
     full_df = pd.merge(peptides_df, metadata_df,
                        on= ["peptide_sequence_id", "hla_class"])[["peptide_sequence", "donor", "hla_class"]].drop_duplicates()
@@ -60,8 +62,10 @@ def load_clean_normal():
 
     new_data_frame['MHC Restriction - Class'] = hla_ligand_atlas_df['hla_class'].map(MHC_restriction_map)
 
-    new_data_frame = new_data_frame[(new_data_frame['MHC Restriction - Class'] == "I")|(new_data_frame['MHC Restriction - Class'] == "II")]
+    new_data_frame = new_data_frame[(new_data_frame['MHC Restriction - Class'] == "I")]
 
+    new_data_frame.to_csv(RAW_DATA_PATH + "cleaned_hla_ligand_atlas_data.csv", index=False)
+    print("Cleaned IEDB data saved to 'cleaned_positive_iedb_data.csv'")
 
     return new_data_frame
 

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from src.config import RAW_DATA_PATH
-from src.data_processing.data_loader import load_iedb
+from src.data_processing.data_loader import load_raw_iedb
 
 
 def select_columns_and_clean_iedb(data_frame):
@@ -97,23 +97,16 @@ def average_number_of_individuals(data_frame):
         data_frame.groupby("Epitope - Name")["positive_subjects_tested"]
         .transform(lambda x: x.sum(min_count=1)))
 
-    data_frame["TEST_averaged_number_subjects_tested"] = (
-        data_frame.groupby("Epitope - Name")["Assay - Number of Subjects Tested"]
-        .transform(lambda x: x.sum(min_count=1)))
-
-    #data_frame.drop(columns=["Assay - Number of Subjects Tested"], inplace=True)
-
     # drop duplicated lines
     data_frame = data_frame.drop_duplicates()
 
     return data_frame
 
 
-
 def load_clean_iedb (min_length =8, max_length = 25):
     # Final cleaning function
     # Loading the IEDB data
-    data_frame = load_iedb()
+    data_frame = load_raw_iedb()
 
     # Remove unnecessary columns and filter the data
     data_frame = select_columns_and_clean_iedb(data_frame)
@@ -127,13 +120,15 @@ def load_clean_iedb (min_length =8, max_length = 25):
     # calculate the averaged number of individuals used in the assays per peptide
     data_frame = average_number_of_individuals(data_frame)
 
+
+    ## Write cleaned file into data/processed
+    data_frame.to_csv(RAW_DATA_PATH + "cleaned_positive_iedb_data.csv", index=False)
+    print("Cleaned IEDB data saved to 'cleaned_positive_iedb_data.csv'")
+
+
     return data_frame
 
 
 if __name__ == "__main__":
     # Load the IEDB data and clean it
-    cleaned_data = load_clean_iedb()
-
-    # Save the cleaned data to a CSV file
-    cleaned_data.to_csv(RAW_DATA_PATH + "cleaned_positive_iedb_data.csv", index=False)
-    print("Cleaned IEDB data saved to 'cleaned_positive_iedb_data.csv'")
+    load_clean_iedb()
