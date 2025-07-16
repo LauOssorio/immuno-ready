@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from src.config import RAW_DATA_PATH
 from src.data_processing.data_loader import load_raw_iedb
+from src.data_processing.feature_engineering import fill_group_II_status
 
 
 def select_columns_and_clean_iedb(data_frame):
@@ -120,10 +121,15 @@ def load_clean_iedb (min_length =8, max_length = 25):
     # calculate the averaged number of individuals used in the assays per peptide
     data_frame = average_number_of_individuals(data_frame)
 
+    # add mhc group status for peptides that are found in MHC I and II
+    data_frame = fill_group_II_status(data_frame)
+
+    data_frame = data_frame.dropna(subset=['MHC Restriction - Class'])
+
 
     ## Write cleaned file into data/processed
-    data_frame.to_csv(RAW_DATA_PATH + "cleaned_positive_iedb_data.csv", index=False)
-    print("Cleaned IEDB data saved to 'cleaned_positive_iedb_data.csv'")
+    # data_frame.to_csv(RAW_DATA_PATH + "cleaned_positive_iedb_data.csv", index=False)
+    # print("Cleaned IEDB data saved to 'cleaned_positive_iedb_data.csv'")
 
 
     return data_frame

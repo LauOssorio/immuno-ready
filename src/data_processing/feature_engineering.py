@@ -1,20 +1,71 @@
 
+# def check_in_group_II(class_II_peptide, class_I_seqs):
+#     return 'peptide shared in MHC I and II' if any(class_I_pep in class_II_peptide for class_I_pep in class_I_seqs) else 'peptide not shared'
 
-def check_in_group_II(seq, group_II_seqs):
-    return 'peptide found in MHC II' if any(seq in s for s in group_II_seqs) else 'peptide only in MHC I'
+# def fill_group_II_status(data_frame):
+#     data_frame['mhc_status'] = None
+
+#     class_I_seqs = data_frame[data_frame['MHC Restriction - Class'] == 'I']['Epitope - Name'].unique()
+
+#     # Only label MHC Class II peptides
+#     data_frame.loc[data_frame['MHC Restriction - Class'] == 'II', 'mhc_status'] = \
+#         data_frame[data_frame['MHC Restriction - Class'] == 'II']['Epitope - Name']\
+#             .apply(lambda x: check_in_group_II(x, class_I_seqs))
+
+#     #data_frame = data_frame[data_frame['MHC Restriction - Class'] == 'II']
+
+#     return data_frame
+
+# import re
+
+# def fill_group_II_status(data_frame):
+#     data_frame['mhc_status'] = None
+
+#     # Get unique MHC class I peptide sequences
+#     class_I_seqs = data_frame[data_frame['MHC Restriction - Class'] == 'I']['Epitope - Name'].unique()
+
+#     # Build regex pattern from class I peptides (escaped for safety)
+#     class_I_pattern = '|'.join(re.escape(p) for p in class_I_seqs)
+
+#     # Filter MHC class II entries
+#     mask_class_II = data_frame['MHC Restriction - Class'] == 'II'
+
+#     # Vectorized substring search: does any class I peptide appear in each class II peptide?
+#     data_frame.loc[mask_class_II, 'mhc_status'] = data_frame.loc[mask_class_II, 'Epitope - Name'] \
+#         .str.contains(class_I_pattern) \
+#         .map(lambda x: 'peptide shared in MHC I and II' if x else 'peptide not shared')
+
+#     return data_frame
+
+import re
 
 def fill_group_II_status(data_frame):
     data_frame['mhc_status'] = None
 
+    # Get unique peptide sequences
+    class_I_seqs = data_frame[data_frame['MHC Restriction - Class'] == 'I']['Epitope - Name'].unique()
     class_II_seqs = data_frame[data_frame['MHC Restriction - Class'] == 'II']['Epitope - Name'].unique()
 
-    data_frame.loc[data_frame['MHC Restriction - Class'] == 'I', 'mhc_status'] = data_frame[data_frame['MHC Restriction - Class'] == 'I']['Epitope - Name'].apply(
-        lambda x: check_in_group_II(x, class_II_seqs)
-    )
+    # Build regex patterns
+    class_I_pattern = '|'.join(re.escape(p) for p in class_I_seqs)
+    class_II_pattern = '|'.join(re.escape(p) for p in class_II_seqs)
 
-    data_frame = data_frame[data_frame["MHC Restriction - Class"] == "I"]
+    # Masks
+    mask_I = data_frame['MHC Restriction - Class'] == 'I'
+    mask_II = data_frame['MHC Restriction - Class'] == 'II'
+
+    # Class II peptides: do they contain any class I peptide?
+    data_frame.loc[mask_II, 'mhc_status'] = data_frame.loc[mask_II, 'Epitope - Name'] \
+        .str.contains(class_I_pattern) \
+        .map(lambda x: 'peptide shared in MHC I and II' if x else 'peptide not shared')
+
+    # Class I peptides: are they contained in any class II peptide?
+    data_frame.loc[mask_I, 'mhc_status'] = data_frame.loc[mask_I, 'Epitope - Name'] \
+        .str.contains(class_II_pattern) \
+        .map(lambda x: 'peptide shared in MHC I and II' if x else 'peptide not shared')
 
     return data_frame
+
 
 
 if __name__ == "__main__":
