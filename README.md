@@ -6,17 +6,20 @@ That said, if you run or collaborate with a wet lab specializing in immuno-oncol
 # Hello, Immuno-World! 🌍
 We are currently in the early stages of setting up the ImmunoReady tool. This README is a work in progress and will be updated frequently as development continues.
 
-Initial Setup
+## Initial Setup
 To get started, clone or download this GitHub repository to your local machine:
 
-git clone https://github.com/LauOssorio/immuno-ready.git
+`git clone https://github.com/LauOssorio/immuno-ready.git`
 
-## Git commits labels
+## Git commit labels
+
+Labels to include at the beginning of commit messages for improved traceability.
+
 - feat:	New feature
 - fix:	Bug fix
-- docs:	Documentation only	docs
-- refactor:	Code changes that don’t change behavior	refactor
-- test:	Adding or updating tests	test
+- dev: development in progress
+- docs:	Documentation only
+- test:	Adding or updating tests
 
 # Training raw data specifications:
 
@@ -27,7 +30,9 @@ The list of peptides (MHC Class I and II) was dowloaded the 29th of June 2025 fr
 
 ## Peptides from IEDB
 
-TO DO: include image of the filters for the search
+![Alt text](doc/img/doc/img/IEDB_search_filters_for_training_set2025-06-30_at_19.50.37.png)
+
+
 The API request is WIP, still not fucntional at the moment.
 
 # Feature engineering

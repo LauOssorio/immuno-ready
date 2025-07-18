@@ -2,39 +2,24 @@ import numpy as np
 import pandas as pd
 from src.config import RAW_DATA_PATH
 from src.data_processing.data_loader import load_raw_iedb
+from src.data_processing.feature_engineering import fill_group_II_status
 
 
 def select_columns_and_clean_iedb(data_frame):
     """
-    Filters and cleans an IEDB dataset by selecting relevant columns and removing
-    observations that are not associated with immunization or disease.
-
-    This function performs the following steps:
-    1. Selects a predefined set of biologically relevant columns related to epitopes,
-       assay conditions, and MHC restrictions.
-    2. Drops duplicate rows to avoid redundant entries.
-    3. Removes rows corresponding to observations from healthy tissues or cases with
-       no immunization, as they are not informative for immunogenicity analysis.
+    Selects relevant columns from the IEDB dataset and removes entries
+    without immunization or from healthy donors.
 
     Parameters:
-    ----------
-    data_frame : pandas.DataFrame
-        The input DataFrame containing IEDB data.
+        data_frame (pd.DataFrame): Raw IEDB data.
 
     Returns:
-    -------
-    pandas.DataFrame
-        A cleaned DataFrame containing only relevant columns and filtered observations.
+        pd.DataFrame: Filtered DataFrame with selected columns and relevant observations.
     """
 
     list_columns = ['Epitope - Name',
-                'Epitope - Source Organism',
-                'Epitope - Species',
                 '1st in vivo Process - Process Type',
                 '1st in vivo Process - Disease',
-                '1st in vivo Process - Disease Stage',
-                'Assay - Method',
-                'Assay - Response measured',
                 'Assay - Qualitative Measurement',
                 'Assay - Number of Subjects Tested',
                 'Assay - Response Frequency (%)',
@@ -49,7 +34,17 @@ def select_columns_and_clean_iedb(data_frame):
 
 
 def fix_weird_peptides (data_frame):
-# Remove weird peptides values
+    """
+    Cleans peptide sequences by:
+    - Removing parts after '+' if present.
+    - Removing sequences containing invalid amino acids (U or X).
+
+    Parameters:
+        data_frame (pd.DataFrame): DataFrame containing a 'Epitope - Name' column.
+
+    Returns:
+        pd.DataFrame: Cleaned DataFrame without malformed peptide entries.
+    """
 
     # Remove the right-hand part for peptides that contain a " + "
     data_frame.loc[:,'Epitope - Name'] = data_frame['Epitope - Name'].str.split('+').str[0].str.strip()
@@ -67,11 +62,30 @@ def fix_weird_peptides (data_frame):
 
 
 def peptide_length(peptide):
-# Function to calculate peptide length
-        return len(str(peptide))
+    """
+    Computes the length of a given peptide.
+
+    Parameters:
+        peptide (str): Amino acid sequence.
+
+    Returns:
+        int: Length of the peptide.
+    """
+    return len(str(peptide))
 
 
 def drop_large_and_short_sequences (data_frame , min_length, max_length):
+    """
+    Removes peptides with sequence lengths outside the specified range.
+
+    Parameters:
+        data_frame (pd.DataFrame): DataFrame with peptide sequences.
+        min_length (int): Minimum allowed peptide length.
+        max_length (int): Maximum allowed peptide length.
+
+    Returns:
+        pd.DataFrame: Filtered DataFrame with sequences within valid length range.
+    """
 # Function that drops all peptides with sequence length > 25 (or any chosen max_length) AA
 
     # Add peptide length column temporarily
@@ -89,13 +103,21 @@ def drop_large_and_short_sequences (data_frame , min_length, max_length):
     return data_frame
 
 def average_number_of_individuals(data_frame):
-# Function to calculate the average number of individuals tested per peptide
-# correcting the number of individuals by the % of response frequency.
+    """
+    Computes a weighted average of positive individuals tested per peptide,
+    accounting for response frequency.
+
+    Parameters:
+        data_frame (pd.DataFrame): DataFrame containing assay response data.
+
+    Returns:
+        pd.DataFrame: DataFrame with an added 'averaged_number_positive_subjects_tested' column.
+    """
     data_frame["positive_subjects_tested"] = data_frame["Assay - Response Frequency (%)"].fillna(100) * 0.01 * data_frame["Assay - Number of Subjects Tested"]
 
-    data_frame["averaged_number_positive_subjects_tested"] = (
+    data_frame["averaged_number_positive_subjects_tested"] = round((
         data_frame.groupby("Epitope - Name")["positive_subjects_tested"]
-        .transform(lambda x: x.sum(min_count=1)))
+        .transform(lambda x: x.sum(min_count=1))).fillna(1))
 
     # drop duplicated lines
     data_frame = data_frame.drop_duplicates()
@@ -104,7 +126,20 @@ def average_number_of_individuals(data_frame):
 
 
 def load_clean_iedb (min_length =8, max_length = 25):
-    # Final cleaning function
+    """
+    Loads and processes raw IEDB data by applying the full cleaning pipeline:
+    - Removes irrelevant or malformed entries.
+    - Filters peptides by length.
+    - Calculates average assay statistics.
+    - Labels peptides shared between MHC class I and II.
+
+    Parameters:
+        min_length (int): Minimum peptide length to retain.
+        max_length (int): Maximum peptide length to retain.
+
+    Returns:
+        pd.DataFrame: Cleaned and annotated IEDB dataset.
+    """
     # Loading the IEDB data
     data_frame = load_raw_iedb()
 
@@ -120,15 +155,19 @@ def load_clean_iedb (min_length =8, max_length = 25):
     # calculate the averaged number of individuals used in the assays per peptide
     data_frame = average_number_of_individuals(data_frame)
 
+    data_frame = data_frame.dropna(subset=['MHC Restriction - Class'])
 
-    ## Write cleaned file into data/processed
-    data_frame.to_csv(RAW_DATA_PATH + "cleaned_positive_iedb_data.csv", index=False)
-    print("Cleaned IEDB data saved to 'cleaned_positive_iedb_data.csv'")
+    # add mhc group status for peptides that are found in MHC I and II
+    data_frame = fill_group_II_status(data_frame)
+
+    data_frame = data_frame.drop(columns=[
+        'Assay - Number of Subjects Tested',
+                'Assay - Response Frequency (%)',
+                '1st in vivo Process - Disease',
+                'positive_subjects_tested'
+    ]).drop_duplicates()
+    data_frame = data_frame[(data_frame['MHC Restriction - Class'] == "I")| (data_frame['MHC Restriction - Class'] == "II")]
+
 
 
     return data_frame
-
-
-if __name__ == "__main__":
-    # Load the IEDB data and clean it
-    load_clean_iedb()
