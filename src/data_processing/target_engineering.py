@@ -1,5 +1,28 @@
+import numpy as np
+
+
 def create_target_features(data_frame):
-    import numpy as np
+    """
+    Creates binary and continuous immunogenicity target features for peptides.
+
+    This function performs the following:
+    - Maps immunization conditions to a binary target (`peptide_base`)
+    - Assigns strength scores to immune responses (`peptide_strength`)
+    - Aggregates peptide-level responses across duplicate entries
+    - Computes a final immunogenicity strength target (`target_strength`)
+
+    Parameters:
+    -----------
+    data_frame : pd.DataFrame
+        Input dataset with epitope metadata and assay results.
+
+    Returns:
+    --------
+    pd.DataFrame
+        DataFrame with a new 'target_strength' column and non-informative
+        rows removed. Intermediate columns used in calculations are dropped.
+    """
+
     ## Hard coding the decisions on immunogenicity
     conditions_immuno = [
         data_frame["1st in vivo Process - Process Type"] == 'Occurrence of infectious disease',
