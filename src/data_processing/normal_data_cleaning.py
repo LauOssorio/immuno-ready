@@ -67,15 +67,9 @@ def load_clean_normal():
     #Create healthy/control columns
     new_data_frame['Epitope - Name'] = hla_ligand_atlas_df['peptide_sequence']
     new_data_frame['averaged_number_positive_subjects_tested'] = hla_ligand_atlas_df['averaged_number_positive_subjects_tested']
-    new_data_frame['Epitope - Source Organism'] = 'Homo sapiens'
-    new_data_frame['Epitope - Species'] = 'Homo sapiens'
     new_data_frame['1st in vivo Process - Process Type'] = 'None'
-    new_data_frame['1st in vivo Process - Disease'] = 'Healthy'
-    new_data_frame['1st in vivo Process - Disease Stage'] = 'Healthy'
-    new_data_frame['Assay - Method'] = 'None'
-    new_data_frame['Assay - Response measured'] = 'None'
-    new_data_frame['Assay - Qualitative Measure'] = 'Negative'
-    new_data_frame['Assay - Response Frequency (%)'] = np.nan
+    new_data_frame['Assay - Qualitative Measurement'] = 'Negative'
+
 
     #Rename values in the hla_class column
     MHC_restriction_map = {
@@ -93,10 +87,7 @@ def load_clean_normal():
     # Drop peptides found in 1 or 2 individuals
     new_data_frame = new_data_frame[new_data_frame['averaged_number_positive_subjects_tested'] > 2]
 
-    new_data_frame = fill_group_II_status(new_data_frame)
-
-    # new_data_frame.to_csv(RAW_DATA_PATH + "cleaned_hla_ligand_atlas_data.csv", index=False)
-    # print("Cleaned HLA ligand atlas data saved to 'cleaned_hla_ligand_atlas_data.csv'")
+    new_data_frame = fill_group_II_status(new_data_frame).drop_duplicates()
 
     return new_data_frame
 

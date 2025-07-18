@@ -29,13 +29,8 @@ def select_columns_and_clean_iedb(data_frame):
     """
 
     list_columns = ['Epitope - Name',
-                'Epitope - Source Organism',
-                'Epitope - Species',
                 '1st in vivo Process - Process Type',
                 '1st in vivo Process - Disease',
-                '1st in vivo Process - Disease Stage',
-                'Assay - Method',
-                'Assay - Response measured',
                 'Assay - Qualitative Measurement',
                 'Assay - Number of Subjects Tested',
                 'Assay - Response Frequency (%)',
@@ -94,9 +89,9 @@ def average_number_of_individuals(data_frame):
 # correcting the number of individuals by the % of response frequency.
     data_frame["positive_subjects_tested"] = data_frame["Assay - Response Frequency (%)"].fillna(100) * 0.01 * data_frame["Assay - Number of Subjects Tested"]
 
-    data_frame["averaged_number_positive_subjects_tested"] = (
+    data_frame["averaged_number_positive_subjects_tested"] = round((
         data_frame.groupby("Epitope - Name")["positive_subjects_tested"]
-        .transform(lambda x: x.sum(min_count=1)))
+        .transform(lambda x: x.sum(min_count=1))).fillna(1))
 
     # drop duplicated lines
     data_frame = data_frame.drop_duplicates()
@@ -121,15 +116,19 @@ def load_clean_iedb (min_length =8, max_length = 25):
     # calculate the averaged number of individuals used in the assays per peptide
     data_frame = average_number_of_individuals(data_frame)
 
+    data_frame = data_frame.dropna(subset=['MHC Restriction - Class'])
+
     # add mhc group status for peptides that are found in MHC I and II
     data_frame = fill_group_II_status(data_frame)
 
-    data_frame = data_frame.dropna(subset=['MHC Restriction - Class'])
+    data_frame = data_frame.drop(columns=[
+        'Assay - Number of Subjects Tested',
+                'Assay - Response Frequency (%)',
+                '1st in vivo Process - Disease',
+                'positive_subjects_tested'
+    ]).drop_duplicates()
+    data_frame = data_frame[(data_frame['MHC Restriction - Class'] == "I")| (data_frame['MHC Restriction - Class'] == "II")]
 
-
-    ## Write cleaned file into data/processed
-    # data_frame.to_csv(RAW_DATA_PATH + "cleaned_positive_iedb_data.csv", index=False)
-    # print("Cleaned IEDB data saved to 'cleaned_positive_iedb_data.csv'")
 
 
     return data_frame

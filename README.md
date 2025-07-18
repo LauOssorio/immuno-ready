@@ -17,9 +17,9 @@ Labels to include at the beginning of commit messages for improved traceability.
 
 - feat:	New feature
 - fix:	Bug fix
-- docs:	Documentation only	docs
-- refactor:	Code changes that don’t change behavior	refactor
-- test:	Adding or updating tests	test
+- dev: development in progress
+- docs:	Documentation only
+- test:	Adding or updating tests
 
 # Training raw data specifications:
 
