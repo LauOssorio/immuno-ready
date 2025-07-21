@@ -112,8 +112,7 @@ def create_target_features(data_frame):
 
 
 
-    data_frame["target_strength"] = (data_frame["peptide_base"] *
-                                     data_frame["averaged_strength"])
+    data_frame["target_strength"] = data_frame["peptide_base"]
 
     return data_frame.drop(columns=[
         "Assay - Qualitative Measurement",

@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from src.data_processing.data_loader import load_dataset3_pca
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
 
 def generate_matrix_for_peptide(peptide, pca_table):
     """
@@ -28,7 +30,7 @@ def generate_matrix_for_peptide(peptide, pca_table):
 
 
 
-def generate_matrices_for_dataset(dataset):
+def AA_index_tokenizer(dataset):
     """
     Generates PCA-based feature matrices for a list of peptides in a dataset.
 
@@ -47,4 +49,7 @@ def generate_matrices_for_dataset(dataset):
     """
     pca_table = load_dataset3_pca()
     peptides = dataset['Epitope - Name'].tolist()
-    return [generate_matrix_for_peptide(p, pca_table) for p in peptides]
+    X_pca_aa = [generate_matrix_for_peptide(p, pca_table) for p in peptides]
+    X_pca_aa_pad = pad_sequences(X_pca_aa, maxlen=25, dtype='float32', padding='post')
+
+    return X_pca_aa_pad
