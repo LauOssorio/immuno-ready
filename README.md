@@ -80,6 +80,9 @@ The API request is WIP, still not fucntional at the moment (https://github.com/I
 - 📈 ROC AUC: 0.81 — Likelihood that the model will assign a higher score to an immunogenic (positive) peptide than to a non-immunogenic (negative) one, when comparing one of each at random.
 
 
+![ROC Curve](doc/img/roc_cnn_multimodal_classifier.png)
+
+
 # Acnowledgement of published work on the matter:
 
 We stand on the shoulders of giants. This job is based on previous published science.
