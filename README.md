@@ -20,7 +20,7 @@ It is being developed with the intention of detecting single amino acid changes 
 ## 🎯 Key Features
 🧠 Deep Learning Model trained on curated immunological data
 
-🎯 Point Mutation Sensitivity to detect single-residue impact on immunogenicity
+🎯 Point Mutation Sensitivity to detect single-residue impact on immunogenicity (under development)
 
 🧪 MHC Class I Focus for CD8+ T-cell epitope prediction
 
@@ -51,7 +51,7 @@ The list of peptides (MHC Class I and II) was dowloaded the 29th of June 2025 fr
 Peptides that are predicted to bind
 The API request is WIP, still not fucntional at the moment (https://github.com/IEDB/IQ-API-use-cases)
 
-# Feature engineering
+## Feature engineering
 - MHC I and II shared epitope: sequence of the MHC class I epitope contained in MHC class II presented epitope.
 
 
@@ -81,6 +81,9 @@ The API request is WIP, still not fucntional at the moment (https://github.com/I
 
 
 # Acnowledgement of published work on the matter:
+
+We stand on the shoulders of giants. This job is based on previous published science.
+
 Li et al., 2021 – DeepImmuno: Deep learning-empowered prediction and generation of immunogenic peptides for T-cell immunity
 👉 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7781330/
 
