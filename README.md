@@ -49,16 +49,38 @@ The list of peptides (MHC Class I and II) was dowloaded the 29th of June 2025 fr
 
 ## Peptides from IEDB
 Peptides that are predicted to bind
-The API request is WIP, still not fucntional at the moment.
+The API request is WIP, still not fucntional at the moment (https://github.com/IEDB/IQ-API-use-cases)
 
 # Feature engineering
 - MHC I and II shared epitope: sequence of the MHC class I epitope contained in MHC class II presented epitope.
 
 
-https://github.com/IEDB/IQ-API-use-cases
+
+## 📊 Benchmarking Datasets
+
+- **TESLA**: Neoantigen dataset from multiple tumor trials.
+- **Sotirov S. et all 2024**: Tumor-Derived Antigenic Peptides as Potential Cancer Vaccines. Int J Mol Sci. 2024 Apr 30;25(9):4934. doi: 10.3390/ijms25094934. PMID: 38732150; PMCID: PMC11084719.
+- **Zachary Sethna et all**: RNA neoantigen vaccines prime long-lived CD8+ T cells in pancreatic cancer. Nature 639, 1042–1051 (2025). https://doi.org/10.1038/s41586-024-08508-4
 
 
-## Acnowledgement of published work on the matter:
+# 📦 Trained Models
+
+| Model Name                    | Type        | Description |
+|-------------------------------|-------------|-------------|
+| `cnn_multimodal_classifier`   | CNN         | A multimodal CNN for binary immunogenicity prediction combining 2D peptide feature maps with categorical metadata via parallel branches and late fusion. |
+
+## 🎯 Performance Metrics
+### Test dataset: a subset from the training/validation sets
+
+#### Model: `cnn_multimodal_classifier`
+- 🔍 Precision: 0.80 — How many predicted positives are actually correct.
+- 🎯 Recall: 0.85 — How many actual positives were correctly identified.
+- ✅ Accuracy: 0.81 — Overall proportion of correct predictions.
+- ⚖️ F1 Score: 0.83 — Harmonic mean of precision and recall; balances both.
+- 📈 ROC AUC: 0.81 — Likelihood that the model will assign a higher score to an immunogenic (positive) peptide than to a non-immunogenic (negative) one, when comparing one of each at random.
+
+
+# Acnowledgement of published work on the matter:
 Li et al., 2021 – DeepImmuno: Deep learning-empowered prediction and generation of immunogenic peptides for T-cell immunity
 👉 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7781330/
 
