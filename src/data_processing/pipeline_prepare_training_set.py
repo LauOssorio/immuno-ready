@@ -49,6 +49,9 @@ def prepare_training_set(tokenizer='AA_index_tokenizer'):
 
     normals  = load_clean_normal()
     iedb_df = load_clean_iedb()
+
+    
+
     # Combine the IEDB and normal dataframes
     full_df= pd.concat([normals, iedb_df], ignore_index=True)
     target_df = create_target_features(full_df)
