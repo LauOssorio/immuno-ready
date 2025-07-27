@@ -160,6 +160,8 @@ def load_clean_iedb (min_length =8, max_length = 25):
     # add mhc group status for peptides that are found in MHC I and II
     data_frame = fill_group_II_status(data_frame)
 
+    data_frame = data_frame[data_frame["1st in vivo Process - Process Type"] != 'Occurrence of cancer']
+
     data_frame = data_frame.drop(columns=[
         'Assay - Number of Subjects Tested',
                 'Assay - Response Frequency (%)',

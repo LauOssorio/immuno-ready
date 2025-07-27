@@ -58,8 +58,6 @@ The API request is WIP, still not fucntional at the moment (https://github.com/I
 
 ## 📊 Benchmarking Datasets
 
-- **TESLA**: Neoantigen dataset from multiple tumor trials.
-- **Sotirov S. et all 2024**: Tumor-Derived Antigenic Peptides as Potential Cancer Vaccines. Int J Mol Sci. 2024 Apr 30;25(9):4934. doi: 10.3390/ijms25094934. PMID: 38732150; PMCID: PMC11084719.
 - **Zachary Sethna et all**: RNA neoantigen vaccines prime long-lived CD8+ T cells in pancreatic cancer. Nature 639, 1042–1051 (2025). https://doi.org/10.1038/s41586-024-08508-4
 
 
@@ -70,7 +68,7 @@ The API request is WIP, still not fucntional at the moment (https://github.com/I
 | `cnn_multimodal_classifier`   | CNN         | A multimodal CNN for binary immunogenicity prediction combining 2D peptide feature maps with categorical metadata via parallel branches and late fusion. |
 
 ## 🎯 Performance Metrics
-### Test dataset: a subset from the training/validation sets
+### Test dataset (subset from the training/validation sets)
 
 #### Model: `cnn_multimodal_classifier`
 - 🔍 Precision: 0.80 — How many predicted positives are actually correct.
@@ -81,6 +79,8 @@ The API request is WIP, still not fucntional at the moment (https://github.com/I
 
 
 ![ROC Curve](doc/img/roc_cnn_multimodal_classifier.png)
+
+### Benchmark dataset ()
 
 
 # Acnowledgement of published work on the matter:

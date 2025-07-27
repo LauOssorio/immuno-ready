@@ -37,4 +37,10 @@ def evaluate_model_cnn_multimodal_classificator(model_path = SAVED_MODELS_PATH +
     plt.show()
 
 if __name__ == "__main__":
-    evaluate_model_cnn_multimodal_classificator()
+    model_name = input("Enter model name to evaluate. Options: cnn_multimodal_classifier\n")
+
+    if model_name == "cnn_multimodal_classifier":
+        print("Evaluating CNN Multimodal Classifier...")
+        evaluate_model_cnn_multimodal_classificator()
+    else:
+        print("❌ Invalid model name. Please choose a valid option.")
