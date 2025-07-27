@@ -65,18 +65,18 @@ Origin: Human peptides (like training), but specific to cancer contexts.
                           |
         +----------------+------------------+
         |                                   |
-+----------------+               +-------------------------+
-|   Training Set  |              |     Evaluation Set      |
-+----------------+               +-------------------------+
-|                |               |                         |
-|  HLA Ligand    |               |  Cancer-derived peptides|
-|  Atlas         |               |  from IEDB (excluded    |
-|  (non-immun.)  |               |  from training)         |
-|                |               |                         |
-|  IEDB          |               +-------------------------+
-|  (immunogenic, |
-|   non-cancer)  |
-+----------------+
+    +----------------+               +-------------------------+
+    |   Training Set  |              |     Evaluation Set      |
+    +----------------+               +-------------------------+
+    |                |               |                         |
+    |  HLA Ligand    |               |  Cancer-derived peptides|
+    |  Atlas         |               |  from IEDB (excluded    |
+    |  (non-immun.)  |               |  from training)         |
+    |                |               |                         |
+    |  IEDB          |               +-------------------------+
+    |  (immunogenic, |
+    |   non-cancer)  |
+    +----------------+
 
 
 
