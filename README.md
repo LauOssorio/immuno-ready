@@ -30,42 +30,71 @@ It is being developed with the intention of detecting single amino acid changes 
 
 ⚡ Fast Inference with minimal input
 
-## Git commit labels
 
-Labels to include at the beginning of commit messages for improved traceability.
+# 🧪 Training and Evaluation Data Specifications
 
-- feat:	New feature
-- fix:	Bug fix
-- dev: development in progress
-- docs:	Documentation only
-- test:	Adding or updating tests
+## 📥 Training Data
 
-# Training raw data specifications:
+### ▶️ Peptides from the HLA Ligand Atlas
+This dataset provides peptides naturally presented by MHC molecules in healthy human tissues. These peptides are assumed to induce immune tolerance, as their presence in normal cells suggests they do not trigger an immune response.
 
-## Peptides from HLA ligand atlas
-This data base will be use to construct the category of peptides  would not trigger an immune response as their presence in normal tissues would indicate immunity tolerance.
+Purpose: Serve as the non-immunogenic class (tolerated peptides).
 
-The list of peptides (MHC Class I and II) was dowloaded the 29th of June 2025 from: https://hla-ligand-atlas.org/data
+Data source: Downloaded on June 29, 2025 from:
+🔗 https://hla-ligand-atlas.org/data
 
-## Peptides from IEDB
-Peptides that are predicted to bind
-The API request is WIP, still not fucntional at the moment (https://github.com/IEDB/IQ-API-use-cases)
+### ▶️ Peptides from IEDB
+These peptides are experimentally validated to trigger positive T cell responses and bind to MHC Class I and II molecules.
 
-## Feature engineering
-- MHC I and II shared epitope: sequence of the MHC class I epitope contained in MHC class II presented epitope.
+Purpose: Serve as the immunogenic class (immune-activating peptides).
+
+Filtering: Cancer-derived epitopes are excluded to avoid bias and ensure that no cancer peptides appear in the training set.
+
+## 🧪 Evaluation (Test) Set
+
+### ▶️ Cancer-Derived Peptides from IEDB
+Peptides in the evaluation set are derived from cancer tissues, as annotated in the IEDB database. These were explicitly excluded from the training data to serve as an independent test set.
+
+Purpose: Evaluate generalization and assess biological bias — the model must predict immunogenicity in cancer peptides without having seen any during training.
+
+Origin: Human peptides (like training), but specific to cancer contexts.
+
+                +--------------------------+
+                |     Total Peptide Data   |
+                +--------------------------+
+                          |
+        +----------------+------------------+
+        |                                   |
++----------------+               +-------------------------+
+|   Training Set  |              |     Evaluation Set      |
++----------------+               +-------------------------+
+|                |               |                         |
+|  HLA Ligand    |               |  Cancer-derived peptides|
+|  Atlas         |               |  from IEDB (excluded    |
+|  (non-immun.)  |               |  from training)         |
+|                |               |                         |
+|  IEDB          |               +-------------------------+
+|  (immunogenic, |
+|   non-cancer)  |
++----------------+
 
 
 
-## 📊 Benchmarking Datasets
+⚠️The API request is WIP, still not fucntional at the moment (https://github.com/IEDB/IQ-API-use-cases)
 
-- **Zachary Sethna et all**: RNA neoantigen vaccines prime long-lived CD8+ T cells in pancreatic cancer. Nature 639, 1042–1051 (2025). https://doi.org/10.1038/s41586-024-08508-4
+
+
+
+# ⚙️ Feature Engineering
+## MHC I and II Shared Epitope:
+For MHC class II-presented peptides, we extract the embedded MHC class I-length epitope (typically 8–11 amino acids) that is contained within the longer class II sequence. This feature captures shared immunogenic motifs that may be presented by both MHC I and II pathways, potentially enhancing the model’s ability to learn cross-presentation signals.
 
 
 # 📦 Trained Models
 
 | Model Name                    | Type        | Description |
 |-------------------------------|-------------|-------------|
-| `cnn_multimodal_classifier`   | CNN         | A multimodal CNN for binary immunogenicity prediction combining 2D peptide feature maps with categorical metadata via parallel branches and late fusion. |
+| `cnn_multimodal_classifier`   | CNN         | A multimodal CNN for binary immunogenicity prediction combining 2D peptide feature maps with categorical metadata via parallel branches and late fusion. Trained on positive IEDB and HLA-ligand atlas normal peptides. |
 
 ## 🎯 Performance Metrics
 ### Test dataset (subset from the training/validation sets)
@@ -80,7 +109,15 @@ The API request is WIP, still not fucntional at the moment (https://github.com/I
 
 ![ROC Curve](doc/img/roc_cnn_multimodal_classifier.png)
 
-### Benchmark dataset ()
+## Git commit labels
+
+Labels to include at the beginning of commit messages for improved traceability.
+
+- feat:	New feature
+- fix:	Bug fix
+- dev: development in progress
+- docs:	Documentation only
+- test:	Adding or updating tests
 
 
 # Acnowledgement of published work on the matter:
