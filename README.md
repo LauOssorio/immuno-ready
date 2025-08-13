@@ -104,11 +104,23 @@ For MHC class II-presented peptides, we extract the embedded MHC class I-length 
 
 #### Model: `cnn_multimodal_classifier`
 - 🔍 Precision: 0.32 (How many predicted positives are actually correct).
-🎯 Recall: 0.63 (How many actual positives were correctly identified).
-✅ Accuracy: 0.46 (Overall proportion of correct predictions).
-⚖️ F1 Score: 0.43 (Harmonic mean of precision and recall; balances both).
-📈 ROC AUC: 0.51 Probability the model ranks a random positive above a random negative.
+- 🎯 Recall: 0.63 (How many actual positives were correctly identified).
+- ✅ Accuracy: 0.46 (Overall proportion of correct predictions).
+- ⚖️ F1 Score: 0.43 (Harmonic mean of precision and recall; balances both).
+- 📈 ROC AUC: 0.51 (Probability the model ranks a random positive above a random negative).
 ![ROC Curve](doc/img/roc_cnn_multimodal_classifier.png)
+
+
+## Current WIP
+The first multi-modal CNN approach using AA index PCA as tokeniser has resulted in a performance close to a "dummy" model.
+This poor performance can be due to:
+1. Cancer-derived (specific) peptides are usually coming from point mutations sequenced in patients. The fact that usually only one aminoacid differs from the wild type version of the MHC presented peptide can be the reason why the model is not able to separate immunogenic from non-immunogenic peptides.
+2. The model is being trained using one dataset for postives and a different dataset for negatives. In theory, peptides should not differ in aminoacidic composition from different databases (meaning, there should not be a bias in the sequencing). However, most peptides from IEDB have their origin in infectious agents such as bacteria or viruses. These differences in the peptide origins can actually lead to compositional differences that can consequently affect the model learning process. In this case, the model would actually be learning how to distinguish peptides coming from different species rather than learning how to discern between immunogenic and non-immunogenic peptides.
+
+To tackle the challenges described above, the next steps are:
+1. The use of a protein-sequence specific embedded layer, such as protBERT.
+2. Try dome other model architectures to avoid possible dataset bias, such as autoencoder consensus.
+
 
 ## Git commit labels
 
