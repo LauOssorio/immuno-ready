@@ -50,7 +50,7 @@ def prepare_training_set(tokenizer='AA_index_tokenizer'):
     normals  = load_clean_normal()
     iedb_df = load_clean_iedb()
 
-    
+
 
     # Combine the IEDB and normal dataframes
     full_df= pd.concat([normals, iedb_df], ignore_index=True)
@@ -160,63 +160,74 @@ def load_or_create_training_data(tokenizer='AA_index_tokenizer'):
 
 
 
-def separate_training_test():
+def separate_train_val(val_size=0.2, random_state=42):
     """
-    Loads or generates the processed dataset and splits it into training, validation, and test sets.
+    Loads or generates the processed dataset and splits it into training and validation sets.
 
-    The split is performed in two stages:
-    1. 60% of the data is allocated to training.
-    2. The remaining 40% is split equally into validation (20%) and test (20%) sets.
+    The split is performed once:
+      - (1 - val_size) fraction of the data is allocated to training.
+      - val_size fraction of the data is reserved for validation.
 
     All inputs (peptide embeddings, categorical features, target labels, and sample weights)
-    are split in a stratified and consistent way using sklearn's `train_test_split`.
+    are split in a consistent way using sklearn's `train_test_split`.
+
+    Parameters
+    ----------
+    val_size : float, optional
+        Fraction of the data to use as validation (default is 0.2, i.e. 20%).
+    random_state : int, optional
+        Random seed for reproducibility (default is 42).
 
     Returns
     -------
     tuple
-        A 12-tuple containing:
+        An 8-tuple containing:
         - X_train : list or np.ndarray
             Tokenized and embedded peptide features for training
         - X_val : list or np.ndarray
             Peptide features for validation
-        - X_test : list or np.ndarray
-            Peptide features for testing
         - X_cat_train : np.ndarray or pd.DataFrame
             One-hot encoded categorical features for training
         - X_cat_val : np.ndarray or pd.DataFrame
             Categorical features for validation
-        - X_cat_test : np.ndarray or pd.DataFrame
-            Categorical features for testing
         - y_train : np.ndarray or pd.Series
             Target labels for training
         - y_val : np.ndarray or pd.Series
             Target labels for validation
-        - y_test : np.ndarray or pd.Series
-            Target labels for testing
         - w_train : np.ndarray
             Scaled sample weights for training
         - w_val : np.ndarray
             Sample weights for validation
-        - w_test : np.ndarray
-            Sample weights for testing
     """
     X, X_categorical, Y, scaled_sample_weights = load_or_create_training_data()
 
-    # First split: Train vs Temp (temp will be split into val and test)
-    X_train, X_temp, X_cat_train, X_cat_temp, y_train, y_temp, w_train, w_temp = train_test_split(
+    X_train, X_val, \
+    X_cat_train, X_cat_val, \
+    y_train, y_val, \
+    w_train, w_val = train_test_split(
         X, X_categorical, Y, scaled_sample_weights,
-        test_size=0.4, random_state=42
+        test_size=val_size,
+        random_state=random_state
     )
 
-    # Second split: Validation and Test (from temp)
-    X_val, X_test, X_cat_val, X_cat_test, y_val, y_test, w_val, w_test = train_test_split(
-        X_temp, X_cat_temp, y_temp, w_temp,
-        test_size=0.5, random_state=42
-    )
+    # Convert peptide input (list of 2D arrays) → (n_samples, 25, 20, 1)
+    X_train = np.stack(X_train).astype(np.float32)[..., np.newaxis]
+    X_val = np.stack(X_val).astype(np.float32)[..., np.newaxis]
+
+    # Convert categorical inputs → (n_samples, n_features)
+    X_cat_train = np.asarray(X_cat_train).astype(np.float32)
+    X_cat_val = np.asarray(X_cat_val).astype(np.float32)
+
+    # Targets and weights as arrays
+    y_train = np.asarray(y_train).astype(np.float32)
+    y_val = np.asarray(y_val).astype(np.float32)
+    w_train = np.asarray(w_train).astype(np.float32)
+    w_val = np.asarray(w_val).astype(np.float32)
+
 
     return (
-        X_train, X_val, X_test,
-        X_cat_train, X_cat_val, X_cat_test,
-        y_train, y_val, y_test,
-        w_train, w_val, w_test
+        X_train, X_val,
+        X_cat_train, X_cat_val,
+        y_train, y_val,
+        w_train, w_val
     )

@@ -1,7 +1,7 @@
 ### Disclaimer ⚠️
-This tool is being developed primarily for educational purposes—to explore how to build tools like this and to create a pharma-oriented coding portfolio. It stands on the project developed at Le Wagon Data Science bootcamp by Alice Lemery, Jean-Baptiste Fallacher, Benjamin Galet PhD and Laura Ossorio Carballo PhD. While we strive for scientific accuracy, any conclusions drawn from its results should not be considered definitive or used as the sole basis for decision-making.
+This tool is being developed primarily for educational purposes: to explore how to build tools like this and to create a pharma-oriented coding portfolio. It stands on the project developed at Le Wagon Data Science bootcamp by Alice Lemery, Jean-Baptiste Fallacher, Benjamin Galet PhD and Laura Ossorio Carballo PhD. While we strive for scientific accuracy, any conclusions drawn from its results should not be considered definitive or used as the sole basis for decision-making.
 
-That said, if you run or collaborate with a wet lab specializing in immuno-oncology and are interested in validating this tool through experiments, we’d love to hear from you! Feel free to reach out—we're always open to meaningful collaborations.
+That said, if you run or collaborate with a wet lab specializing in immuno-oncology and are interested in validating this tool through experiments, we’d love to hear from you! Feel free to reach out, we're always open to meaningful collaborations.
 
 
 
@@ -11,7 +11,7 @@ Deep Learning for Immune Readiness & Personalized Cancer Vaccine Design
 
 ## 🧬 What is ImmunoReady?
 ImmunoReady is a deep learning tool trained with a comprehensive immunological dataset to predict whether a MHC class I peptide can trigger an immune response.
-It is being developed with the intention of detecting single amino acid changes in immunopeptides — a critical capability for assessing the potential effectiveness of personalized vaccines based on point mutations.
+It is being developed with the intention of detecting single amino acid changes in immunopeptides, a critical capability for assessing the potential effectiveness of personalized vaccines based on point mutations.
 
 🧠 AI-Powered
 🔬 Mutation-Sensitive
@@ -30,6 +30,98 @@ It is being developed with the intention of detecting single amino acid changes 
 
 ⚡ Fast Inference with minimal input
 
+
+# 🧪 Training and Evaluation Data Specifications
+
+## 📥 Training Data
+
+### ▶️ Peptides from the HLA Ligand Atlas
+This dataset provides peptides naturally presented by MHC molecules in healthy human tissues. These peptides are assumed to induce immune tolerance, as their presence in normal cells suggests they do not trigger an immune response.
+
+Purpose: Serve as the non-immunogenic class (tolerated peptides).
+
+Data source: Downloaded on June 29, 2025 from:
+🔗 https://hla-ligand-atlas.org/data
+
+### ▶️ Peptides from IEDB
+These peptides are experimentally validated to trigger positive T cell responses and bind to MHC Class I and II molecules.
+
+Purpose: Serve as the immunogenic class (immune-activating peptides).
+
+Filtering: Cancer-derived epitopes are excluded to avoid bias and ensure that no cancer peptides appear in the training set.
+
+## 🛠 Training Set Preparation and Sample Weighting
+The training dataset is built by merging non-immunogenic peptides from the HLA Ligand Atlas and immunogenic peptides from IEDB (excluding cancer-derived sequences). After cleaning and combining the datasets, categorical features such as MHC Restriction Class and MHC status are one-hot encoded, and peptide sequences are embedded using the tokeniser of choice. For each peptide entry, a raw weight is calculated as the averaged number of individuals in which the peptide was observed. To prevent extreme differences in loss contribution, these weights are scaled to a fixed range using MinMaxScaler and applied during model training. The processed feature matrices, target labels, and scaled weights are stored as .joblib files for fast reuse. The pipeline also includes a reproducible train/validation split, ensuring that embeddings, categorical features, targets, and weights remain aligned across both sets.
+
+## 🧪 Evaluation (Test) Set
+
+### ▶️ Cancer-Derived Peptides from IEDB
+Peptides in the evaluation set are derived from cancer tissues, as annotated in the IEDB database. These were explicitly excluded from the training data to serve as an independent test set.
+
+Purpose: Evaluate generalization and assess biological bias. The model must predict immunogenicity in cancer peptides without having seen any during training.
+
+Origin: Human peptides (like training), but specific to cancer contexts.
+
+                +--------------------------+
+                |     Total Peptide Data   |
+                +--------------------------+
+                          |
+        +----------------+------------------+
+        |                                   |
+    +----------------+               +-------------------------+
+    |   Training Set  |              |     Evaluation Set      |
+    +----------------+               +-------------------------+
+    |                |               |                         |
+    |  HLA Ligand    |               |  Cancer-derived peptides|
+    |  Atlas         |               |  from IEDB (excluded    |
+    |  (non-immun.)  |               |  from training)         |
+    |                |               |                         |
+    |  IEDB          |               +-------------------------+
+    |  (immunogenic, |
+    |   non-cancer)  |
+    +----------------+
+
+
+
+⚠️The API request is WIP, still not functional at the moment (https://github.com/IEDB/IQ-API-use-cases)
+
+
+
+
+# ⚙️ Feature Engineering
+## MHC I and II Shared Epitope:
+For MHC class II-presented peptides, we extract the embedded MHC class I-length epitope (typically 8–11 amino acids) that is contained within the longer class II sequence. This feature captures shared immunogenic motifs that may be presented by both MHC I and II pathways, potentially enhancing the model’s ability to learn cross-presentation signals.
+
+
+
+# 📦 Trained Models
+
+| Model Name                    | Type        | Description |
+|-------------------------------|-------------|-------------|
+| `cnn_multimodal_classifier`   | CNN         | A multimodal CNN for binary immunogenicity prediction combining 2D peptide feature maps with categorical metadata via parallel branches and late fusion. Trained on positive IEDB (excluding peptides from cancer as previously stated) and HLA-ligand atlas normal peptides. Tested on cancer-derived peptides. |
+
+## 🎯 Performance Metrics
+
+#### Model: `cnn_multimodal_classifier`
+- 🔍 Precision: 0.32 (How many predicted positives are actually correct).
+- 🎯 Recall: 0.63 (How many actual positives were correctly identified).
+- ✅ Accuracy: 0.46 (Overall proportion of correct predictions).
+- ⚖️ F1 Score: 0.43 (Harmonic mean of precision and recall; balances both).
+- 📈 ROC AUC: 0.51 (Probability the model ranks a random positive above a random negative).
+![ROC Curve](doc/img/roc_cnn_multimodal_classifier.png)
+
+
+## Current WIP
+The first multi-modal CNN approach using AA index PCA as tokeniser has resulted in a performance close to a "dummy" model.
+This poor performance can be due to:
+1. Cancer-derived (specific) peptides are usually coming from point mutations sequenced in patients. The fact that usually only one aminoacid differs from the wild type version of the MHC presented peptide can be the reason why the model is not able to separate immunogenic from non-immunogenic peptides.
+2. The model is being trained using one dataset for postives and a different dataset for negatives. In theory, peptides should not differ in aminoacidic composition from different databases (meaning, there should not be a bias in the sequencing). However, most peptides from IEDB have their origin in infectious agents such as bacteria or viruses. These differences in the peptide origins can actually lead to compositional differences that can consequently affect the model learning process. In this case, the model would actually be learning how to distinguish peptides coming from different species rather than learning how to discern between immunogenic and non-immunogenic peptides.
+
+To tackle the challenges described above, the next steps are:
+1. The use of a protein-sequence specific embedded layer, such as protBERT.
+2. Try dome other model architectures to avoid possible dataset bias, such as autoencoder consensus.
+
+
 ## Git commit labels
 
 Labels to include at the beginning of commit messages for improved traceability.
@@ -39,48 +131,6 @@ Labels to include at the beginning of commit messages for improved traceability.
 - dev: development in progress
 - docs:	Documentation only
 - test:	Adding or updating tests
-
-# Training raw data specifications:
-
-## Peptides from HLA ligand atlas
-This data base will be use to construct the category of peptides  would not trigger an immune response as their presence in normal tissues would indicate immunity tolerance.
-
-The list of peptides (MHC Class I and II) was dowloaded the 29th of June 2025 from: https://hla-ligand-atlas.org/data
-
-## Peptides from IEDB
-Peptides that are predicted to bind
-The API request is WIP, still not fucntional at the moment (https://github.com/IEDB/IQ-API-use-cases)
-
-## Feature engineering
-- MHC I and II shared epitope: sequence of the MHC class I epitope contained in MHC class II presented epitope.
-
-
-
-## 📊 Benchmarking Datasets
-
-- **Zachary Sethna et all**: RNA neoantigen vaccines prime long-lived CD8+ T cells in pancreatic cancer. Nature 639, 1042–1051 (2025). https://doi.org/10.1038/s41586-024-08508-4
-
-
-# 📦 Trained Models
-
-| Model Name                    | Type        | Description |
-|-------------------------------|-------------|-------------|
-| `cnn_multimodal_classifier`   | CNN         | A multimodal CNN for binary immunogenicity prediction combining 2D peptide feature maps with categorical metadata via parallel branches and late fusion. |
-
-## 🎯 Performance Metrics
-### Test dataset (subset from the training/validation sets)
-
-#### Model: `cnn_multimodal_classifier`
-- 🔍 Precision: 0.80 — How many predicted positives are actually correct.
-- 🎯 Recall: 0.85 — How many actual positives were correctly identified.
-- ✅ Accuracy: 0.81 — Overall proportion of correct predictions.
-- ⚖️ F1 Score: 0.83 — Harmonic mean of precision and recall; balances both.
-- 📈 ROC AUC: 0.81 — Likelihood that the model will assign a higher score to an immunogenic (positive) peptide than to a non-immunogenic (negative) one, when comparing one of each at random.
-
-
-![ROC Curve](doc/img/roc_cnn_multimodal_classifier.png)
-
-### Benchmark dataset ()
 
 
 # Acnowledgement of published work on the matter:

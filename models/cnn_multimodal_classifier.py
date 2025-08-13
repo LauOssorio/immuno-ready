@@ -1,6 +1,6 @@
 from tensorflow.keras import Input, Model, layers
 
-def paper_CNN_multimodal_class(image_shape=(25, 20, 1), categorical_input_shape=(4,)):
+def CNN_multimodal_class(image_shape=(25, 20, 1), categorical_input_shape=(4,)):
     # Image input branch
     image_input = Input(shape=image_shape, name="image_input")
     x = layers.Conv2D(filters=16, kernel_size=(2, 12))(image_input)
