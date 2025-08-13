@@ -23,68 +23,68 @@ def create_target_features(data_frame):
         rows removed. Intermediate columns used in calculations are dropped.
     """
 
-    ## Hard coding the decisions on immunogenicity
-    conditions_immuno = [
-        data_frame["1st in vivo Process - Process Type"] == 'Occurrence of infectious disease',
-        data_frame["1st in vivo Process - Process Type"] =='Occurrence of allergy',
-        data_frame["1st in vivo Process - Process Type"] =='Exposure with existing immune reactivity without evidence for disease',
-        data_frame["1st in vivo Process - Process Type"] == 'Unknown',
-        data_frame["1st in vivo Process - Process Type"] == 'Occurrence of autoimmune disease',
-        data_frame["1st in vivo Process - Process Type"] =='Environmental exposure to endemic/ubiquitous agent without evidence for disease',
-        data_frame["1st in vivo Process - Process Type"] =='Prophylactic vaccination',
-        data_frame["1st in vivo Process - Process Type"] =='Administration in vivo',
-        data_frame["1st in vivo Process - Process Type"] =='Occurrence of disease',
-        data_frame["1st in vivo Process - Process Type"] =='Exposure without evidence for disease',
-        #data_frame["1st in vivo Process - Process Type"] =='Occurrence of cancer',
-        data_frame["1st in vivo Process - Process Type"] =='Documented exposure without evidence for disease',
-        data_frame["1st in vivo Process - Process Type"] =='Transplant/transfusion',
-        data_frame["1st in vivo Process - Process Type"] =='Vaccination',
-        data_frame["1st in vivo Process - Process Type"] =='Therapeutic vaccination',
-        data_frame["1st in vivo Process - Process Type"] =='Administration in vivo to cause disease',
-        data_frame["1st in vivo Process - Process Type"] == np.nan,
-        data_frame["1st in vivo Process - Process Type"] =='Administration in vivo to prevent or reduce disease',
-        data_frame["1st in vivo Process - Process Type"] == 'None'
-        ]
+    # ## Hard coding the decisions on immunogenicity
+    # conditions_immuno = [
+    #     data_frame["1st in vivo Process - Process Type"] == 'Occurrence of infectious disease',
+    #     data_frame["1st in vivo Process - Process Type"] =='Occurrence of allergy',
+    #     data_frame["1st in vivo Process - Process Type"] =='Exposure with existing immune reactivity without evidence for disease',
+    #     data_frame["1st in vivo Process - Process Type"] == 'Unknown',
+    #     data_frame["1st in vivo Process - Process Type"] == 'Occurrence of autoimmune disease',
+    #     data_frame["1st in vivo Process - Process Type"] =='Environmental exposure to endemic/ubiquitous agent without evidence for disease',
+    #     data_frame["1st in vivo Process - Process Type"] =='Prophylactic vaccination',
+    #     data_frame["1st in vivo Process - Process Type"] =='Administration in vivo',
+    #     data_frame["1st in vivo Process - Process Type"] =='Occurrence of disease',
+    #     data_frame["1st in vivo Process - Process Type"] =='Exposure without evidence for disease',
+    #     #data_frame["1st in vivo Process - Process Type"] =='Occurrence of cancer',
+    #     data_frame["1st in vivo Process - Process Type"] =='Documented exposure without evidence for disease',
+    #     data_frame["1st in vivo Process - Process Type"] =='Transplant/transfusion',
+    #     data_frame["1st in vivo Process - Process Type"] =='Vaccination',
+    #     data_frame["1st in vivo Process - Process Type"] =='Therapeutic vaccination',
+    #     data_frame["1st in vivo Process - Process Type"] =='Administration in vivo to cause disease',
+    #     data_frame["1st in vivo Process - Process Type"] == np.nan,
+    #     data_frame["1st in vivo Process - Process Type"] =='Administration in vivo to prevent or reduce disease',
+    #     data_frame["1st in vivo Process - Process Type"] == 'None'
+    #     ]
 
-    choices_immuno = [1,
-        1,
-        1,
-        "unknown",
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        #1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        "unknown",
-        1,
-        0]
+    # choices_immuno = [1,
+    #     1,
+    #     1,
+    #     "unknown",
+    #     1,
+    #     1,
+    #     1,
+    #     1,
+    #     1,
+    #     1,
+    #     #1,
+    #     1,
+    #     1,
+    #     1,
+    #     1,
+    #     1,
+    #     "unknown",
+    #     1,
+    #     0]
 
-    choices_immuno = [str(x) for x in choices_immuno]
+    # choices_immuno = [str(x) for x in choices_immuno]
 
-    data_frame["peptide_base"] = np.select(conditions_immuno, choices_immuno, default = "other")
+    # data_frame["peptide_base"] = np.select(conditions_immuno, choices_immuno, default = "other")
 
-    # filter the unkown out
-    data_frame = data_frame[data_frame["peptide_base"] != "unknown"]
-    data_frame = data_frame[data_frame["peptide_base"] != "other"]
+    # # filter the unkown out
+    # data_frame = data_frame[data_frame["peptide_base"] != "unknown"]
+    # data_frame = data_frame[data_frame["peptide_base"] != "other"]
 
-    # Convert to integer the column peptide safety
-    data_frame['peptide_base'] = data_frame['peptide_base'].fillna(0).astype(int)
+    # # Convert to integer the column peptide safety
+    # data_frame['peptide_base'] = data_frame['peptide_base'].fillna(0).astype(int)
 
-    # if a peptide has multiple entries, keep the immunogenic (1)
-    peptide_base_sum = data_frame.groupby("Epitope - Name")["peptide_base"].sum()
-    data_frame["peptide_base_sum"] = data_frame["Epitope - Name"].map(peptide_base_sum)
-    data_frame['peptide_base'] = data_frame['peptide_base_sum'].clip(upper=1)
+    # # if a peptide has multiple entries, keep the immunogenic (1)
+    # peptide_base_sum = data_frame.groupby("Epitope - Name")["peptide_base"].sum()
+    # data_frame["peptide_base_sum"] = data_frame["Epitope - Name"].map(peptide_base_sum)
+    # data_frame['peptide_base'] = data_frame['peptide_base_sum'].clip(upper=1)
 
-        # Immunity strength
+    #     # Immunity strength
 
-    conditions_strength = [data_frame["Assay - Qualitative Measurement"] == 'Positive',
+    conditions_immuno = [data_frame["Assay - Qualitative Measurement"] == 'Positive',
                         data_frame["Assay - Qualitative Measurement"] =='Positive-Low',
                         data_frame["Assay - Qualitative Measurement"] =='Positive-Intermediate',
                         data_frame["Assay - Qualitative Measurement"] =='Positive-High',
@@ -93,32 +93,35 @@ def create_target_features(data_frame):
                         ]
 
 
-    choices_strength = [
-        0.7,
-        0.3,
-        0.5,
+    choices_immuno = [
         1,
-        0.5,
+        1,
+        1,
+        1,
+        1,
         0
     ]
+    data_frame["target_strength"] = np.select(conditions_immuno, choices_immuno, default = "other")
+
+    return data_frame
 
 
-    data_frame["peptide_strength"] = np.select(conditions_strength, choices_strength, default = np.nan)
+    # data_frame["peptide_strength"] = np.select(conditions_strength, choices_strength, default = np.nan)
 
-    data_frame["averaged_strength"] = (
-        data_frame.groupby("Epitope - Name")["peptide_strength"]
-        .transform("mean")
-    )
+    # data_frame["averaged_strength"] = (
+    #     data_frame.groupby("Epitope - Name")["peptide_strength"]
+    #     .transform("mean")
+    # )
 
 
 
-    data_frame["target_strength"] = data_frame["peptide_base"]
+    # data_frame["target_strength"] = data_frame["peptide_base"]
 
-    return data_frame.drop(columns=[
-        "Assay - Qualitative Measurement",
-        "1st in vivo Process - Process Type",
-        "peptide_base",
-        "peptide_strength",
-        "averaged_strength",
-        "peptide_base_sum"
-    ])
+    # return data_frame.drop(columns=[
+    #     "Assay - Qualitative Measurement",
+    #     "1st in vivo Process - Process Type",
+    #     "peptide_base",
+    #     "peptide_strength",
+    #     "averaged_strength",
+    #     "peptide_base_sum"
+    # ])

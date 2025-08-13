@@ -1,7 +1,7 @@
 ### Disclaimer ⚠️
-This tool is being developed primarily for educational purposes—to explore how to build tools like this and to create a pharma-oriented coding portfolio. It stands on the project developed at Le Wagon Data Science bootcamp by Alice Lemery, Jean-Baptiste Fallacher, Benjamin Galet PhD and Laura Ossorio Carballo PhD. While we strive for scientific accuracy, any conclusions drawn from its results should not be considered definitive or used as the sole basis for decision-making.
+This tool is being developed primarily for educational purposes: to explore how to build tools like this and to create a pharma-oriented coding portfolio. It stands on the project developed at Le Wagon Data Science bootcamp by Alice Lemery, Jean-Baptiste Fallacher, Benjamin Galet PhD and Laura Ossorio Carballo PhD. While we strive for scientific accuracy, any conclusions drawn from its results should not be considered definitive or used as the sole basis for decision-making.
 
-That said, if you run or collaborate with a wet lab specializing in immuno-oncology and are interested in validating this tool through experiments, we’d love to hear from you! Feel free to reach out—we're always open to meaningful collaborations.
+That said, if you run or collaborate with a wet lab specializing in immuno-oncology and are interested in validating this tool through experiments, we’d love to hear from you! Feel free to reach out, we're always open to meaningful collaborations.
 
 
 
@@ -11,7 +11,7 @@ Deep Learning for Immune Readiness & Personalized Cancer Vaccine Design
 
 ## 🧬 What is ImmunoReady?
 ImmunoReady is a deep learning tool trained with a comprehensive immunological dataset to predict whether a MHC class I peptide can trigger an immune response.
-It is being developed with the intention of detecting single amino acid changes in immunopeptides — a critical capability for assessing the potential effectiveness of personalized vaccines based on point mutations.
+It is being developed with the intention of detecting single amino acid changes in immunopeptides, a critical capability for assessing the potential effectiveness of personalized vaccines based on point mutations.
 
 🧠 AI-Powered
 🔬 Mutation-Sensitive
@@ -50,12 +50,15 @@ Purpose: Serve as the immunogenic class (immune-activating peptides).
 
 Filtering: Cancer-derived epitopes are excluded to avoid bias and ensure that no cancer peptides appear in the training set.
 
+## 🛠 Training Set Preparation and Sample Weighting
+The training dataset is built by merging non-immunogenic peptides from the HLA Ligand Atlas and immunogenic peptides from IEDB (excluding cancer-derived sequences). After cleaning and combining the datasets, categorical features such as MHC Restriction Class and MHC status are one-hot encoded, and peptide sequences are embedded using the tokeniser of choice. For each peptide entry, a raw weight is calculated as the averaged number of individuals in which the peptide was observed. To prevent extreme differences in loss contribution, these weights are scaled to a fixed range using MinMaxScaler and applied during model training. The processed feature matrices, target labels, and scaled weights are stored as .joblib files for fast reuse. The pipeline also includes a reproducible train/validation split, ensuring that embeddings, categorical features, targets, and weights remain aligned across both sets.
+
 ## 🧪 Evaluation (Test) Set
 
 ### ▶️ Cancer-Derived Peptides from IEDB
 Peptides in the evaluation set are derived from cancer tissues, as annotated in the IEDB database. These were explicitly excluded from the training data to serve as an independent test set.
 
-Purpose: Evaluate generalization and assess biological bias — the model must predict immunogenicity in cancer peptides without having seen any during training.
+Purpose: Evaluate generalization and assess biological bias. The model must predict immunogenicity in cancer peptides without having seen any during training.
 
 Origin: Human peptides (like training), but specific to cancer contexts.
 
@@ -80,7 +83,7 @@ Origin: Human peptides (like training), but specific to cancer contexts.
 
 
 
-⚠️The API request is WIP, still not fucntional at the moment (https://github.com/IEDB/IQ-API-use-cases)
+⚠️The API request is WIP, still not functional at the moment (https://github.com/IEDB/IQ-API-use-cases)
 
 
 
@@ -90,23 +93,21 @@ Origin: Human peptides (like training), but specific to cancer contexts.
 For MHC class II-presented peptides, we extract the embedded MHC class I-length epitope (typically 8–11 amino acids) that is contained within the longer class II sequence. This feature captures shared immunogenic motifs that may be presented by both MHC I and II pathways, potentially enhancing the model’s ability to learn cross-presentation signals.
 
 
+
 # 📦 Trained Models
 
 | Model Name                    | Type        | Description |
 |-------------------------------|-------------|-------------|
-| `cnn_multimodal_classifier`   | CNN         | A multimodal CNN for binary immunogenicity prediction combining 2D peptide feature maps with categorical metadata via parallel branches and late fusion. Trained on positive IEDB and HLA-ligand atlas normal peptides. |
+| `cnn_multimodal_classifier`   | CNN         | A multimodal CNN for binary immunogenicity prediction combining 2D peptide feature maps with categorical metadata via parallel branches and late fusion. Trained on positive IEDB (excluding peptides from cancer as previously stated) and HLA-ligand atlas normal peptides. Tested on cancer-derived peptides. |
 
 ## 🎯 Performance Metrics
-### Test dataset (subset from the training/validation sets)
 
 #### Model: `cnn_multimodal_classifier`
-- 🔍 Precision: 0.80 — How many predicted positives are actually correct.
-- 🎯 Recall: 0.85 — How many actual positives were correctly identified.
-- ✅ Accuracy: 0.81 — Overall proportion of correct predictions.
-- ⚖️ F1 Score: 0.83 — Harmonic mean of precision and recall; balances both.
-- 📈 ROC AUC: 0.81 — Likelihood that the model will assign a higher score to an immunogenic (positive) peptide than to a non-immunogenic (negative) one, when comparing one of each at random.
-
-
+- 🔍 Precision: 0.32 (How many predicted positives are actually correct).
+🎯 Recall: 0.63 (How many actual positives were correctly identified).
+✅ Accuracy: 0.46 (Overall proportion of correct predictions).
+⚖️ F1 Score: 0.43 (Harmonic mean of precision and recall; balances both).
+📈 ROC AUC: 0.51 Probability the model ranks a random positive above a random negative.
 ![ROC Curve](doc/img/roc_cnn_multimodal_classifier.png)
 
 ## Git commit labels
